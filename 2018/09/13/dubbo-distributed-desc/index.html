@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="浅谈分布式架构分布式架构单看这个名字给人的感觉就是高逼格，但其实从历史的角度来分析一下就比较明了了。  当业务量和用户量发展到一定地步的时候，这时一般会将应用同时部署到几台服务器上，在用户访问的时候使用Nginx进行反向代理和简单的负载均衡。 SOA服务化当整个系统以及发展的足够大的时候，比如一个电商系统中存在有：  用户系统 订单系统 支付系统 物流系统    所以需要将整个项目拆分成若干个独立">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="dubbo-distributed-desc">
+<meta property="og:url" content="http://yoursite.com/2018/09/13/dubbo-distributed-desc/index.html">
+<meta property="og:site_name" content="drip memory">
+<meta property="og:description" content="浅谈分布式架构分布式架构单看这个名字给人的感觉就是高逼格，但其实从历史的角度来分析一下就比较明了了。  当业务量和用户量发展到一定地步的时候，这时一般会将应用同时部署到几台服务器上，在用户访问的时候使用Nginx进行反向代理和简单的负载均衡。 SOA服务化当整个系统以及发展的足够大的时候，比如一个电商系统中存在有：  用户系统 订单系统 支付系统 物流系统    所以需要将整个项目拆分成若干个独立">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2018/09/13/dubbo-distributed-desc/a1.jpg">
+<meta property="og:updated_time" content="2018-09-13T03:11:17.970Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="dubbo-distributed-desc">
+<meta name="twitter:description" content="浅谈分布式架构分布式架构单看这个名字给人的感觉就是高逼格，但其实从历史的角度来分析一下就比较明了了。  当业务量和用户量发展到一定地步的时候，这时一般会将应用同时部署到几台服务器上，在用户访问的时候使用Nginx进行反向代理和简单的负载均衡。 SOA服务化当整个系统以及发展的足够大的时候，比如一个电商系统中存在有：  用户系统 订单系统 支付系统 物流系统    所以需要将整个项目拆分成若干个独立">
+<meta name="twitter:image" content="http://yoursite.com/2018/09/13/dubbo-distributed-desc/a1.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/09/13/dubbo-distributed-desc/"/>
+
+
+
+
+<link href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css" rel="stylesheet">
+  <title>dubbo-distributed-desc | drip memory</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">drip memory</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">总有一个适合你</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br />
+            
+            日程表
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/13/dubbo-distributed-desc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Rayenz">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="drip memory">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">dubbo-distributed-desc</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-13T10:22:51+08:00">
+                2018-09-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="浅谈分布式架构"><a href="#浅谈分布式架构" class="headerlink" title="浅谈分布式架构"></a>浅谈分布式架构</h2><p>分布式架构单看这个名字给人的感觉就是高逼格，但其实从历史的角度来分析一下就比较明了了。</p>
+<p><img src="a1.jpg" alt=""></p>
+<p>当业务量和用户量发展到一定地步的时候，这时一般会将应用同时部署到几台服务器上，在用户访问的时候使用Nginx进行反向代理和简单的负载均衡。</p>
+<h2 id="SOA服务化"><a href="#SOA服务化" class="headerlink" title="SOA服务化"></a>SOA服务化</h2><p>当整个系统以及发展的足够大的时候，比如一个电商系统中存在有：</p>
+<ul>
+<li>用户系统</li>
+<li>订单系统</li>
+<li>支付系统</li>
+<li>物流系统</li>
+</ul>
+<blockquote>
+<blockquote>
+<p>所以需要将整个项目拆分成若干个独立的应用，可以进行独立的开发上线实现快速迭代。</p>
+</blockquote>
+</blockquote>
+<h1 id="基于dubbo的实现"><a href="#基于dubbo的实现" class="headerlink" title="基于dubbo的实现"></a>基于dubbo的实现</h1><p>dubbo应该算是国内使用最多的分布式服务框架，基于此来实现对新入门的同学应该很有帮助。</p>
+<blockquote>
+<blockquote>
+<p>其中有涉及到安装dubbo服务的注册中心zookeeper等相关知识点可以自行查看官方文档，这里就不单独讲了。</p>
+</blockquote>
+</blockquote>
+<h2 id="对外提供服务"><a href="#对外提供服务" class="headerlink" title="[]对外提供服务"></a>[]对外提供服务</h2><p>首先第一步需要在<code>SSM-API</code>模块中定义一个接口，这里就搞了一个用户查询的接口  </p>
+<p>/*<em><br> \</em> Function:用户API<br> * @since JDK 1.7<br> */<br>public interface UserInfoApi {</p>
+<pre><code>/**
+ \* 获取用户信息
+ \* @param userId
+ \* @return
+ \* @throws Exception
+ */
+public UserInfoRsp getUserInfo(int userId) throws Exception;
+</code></pre><p>}</p>
+<p>接着在<code>SSM-SERVICE</code>模块中进行实现：  </p>
+<p>import com.alibaba.dubbo.config.annotation.Service;</p>
+<p>/*<em><br> \</em> Function:<br> * @since JDK 1.7<br> */<br>@Service<br>public class UserInfoApiImpl implements UserInfoApi {</p>
+<pre><code>private static Logger logger = LoggerFactory.getLogger(UserInfoApiImpl.class);
+
+@Autowired
+private T\_userService t\_userService ;
+
+/**
+ \* 获取用户信息
+ \* @param userId
+ \* @return
+ \* @throws Exception
+ */
+@Override
+public UserInfoRsp getUserInfo(int userId) throws Exception {
+
+    logger.info(&quot;用户查询Id=&quot;+userId);
+
+    //返回对象
+
+    UserInfoRsp userInfoRsp = new UserInfoRsp() ;
+
+    T\_user t\_user = t_userService.selectByPrimaryKey(userId) ;
+
+    //构建
+
+    buildUserInfoRsp(userInfoRsp,t_user) ;
+
+    return userInfoRsp;
+
+}
+
+/**
+ \* 构建返回
+ \* @param userInfoRsp
+ \* @param t_user
+ */
+private void buildUserInfoRsp(UserInfoRsp userInfoRsp, T\_user t\_user) {
+
+    if (t_user ==  null){
+
+        t_user = new T_user() ;
+
+    }
+
+    CommonUtil.setLogValueModelToModel(t_user,userInfoRsp);
+
+}
+</code></pre><p>}</p>
+<p>这些都是通用的代码，但值得注意的一点是这里使用的<code>dubbo</code>框架所提供的<code>@service</code>注解。作用是声明需要暴露的服务接口。</p>
+<p>再之后就是几个dubbo相关的配置文件了。</p>
+<h3 id="spring-dubbo-config-xml"><a href="#spring-dubbo-config-xml" class="headerlink" title="spring-dubbo-config.xml"></a>spring-dubbo-config.xml</h3><p>&lt;dubbo:application name=”ssm-service” owner=”crossoverJie”</p>
+<pre><code>organization=&quot;ssm-crossoverJie&quot; logger=&quot;slf4j&quot;/&gt;
+</code></pre><p>&lt;dubbo:registry id=”dubbo-registry” address=”zookeeper://192.168.0.188:2181”</p>
+<pre><code>file=&quot;/tmp/dubbo.cachr&quot; /&gt;
+</code></pre><p>&lt;dubbo:monitor protocol=”registry” /&gt;</p>
+<p>&lt;dubbo:protocol name=”dubbo” port=”20880” /&gt;</p>
+<p>&lt;dubbo:provider timeout=”15000” retries=”0” delay=”-1” /&gt;</p>
+<p>&lt;dubbo:consumer check=”false” timeout=”15000” /&gt;</p>
+<p>其实就是配置我们服务注册的zk地址，以及服务名称、超时时间等配置。</p>
+<h3 id="spring-dubbo-provider-xml"><a href="#spring-dubbo-provider-xml" class="headerlink" title="spring-dubbo-provider.xml"></a>spring-dubbo-provider.xml</h3><p>&lt;dubbo:annotation package=”com.crossoverJie.api.impl” /&gt;</p>
+<p>这个配置扫描注解包的位置，一般配置到接口实现包即可。</p>
+<h3 id="spring-dubbo-consumer-xml"><a href="#spring-dubbo-consumer-xml" class="headerlink" title="spring-dubbo-consumer.xml"></a>spring-dubbo-consumer.xml</h3><p>这个是消费者配置项，表明我们需要依赖的其他应用。<br>这里我们在<code>SSM-BOOT</code>项目中进行配置：  </p>
+<p>&lt;dubbo:reference id=”userInfoApi”</p>
+<pre><code>interface=&quot;com.crossoverJie.api.UserInfoApi&quot; /&gt;
+</code></pre><p>直接就是配置的刚才我们提供的那个用户查询的接口，这样当我们自己的内部项目需要使用到这个服务只需要依赖<code>SSM-BOOT</code>即可，不需要单独的再去配置<code>consumer</code>。这个我有在上一篇<a href="http://crossoverjie.top/2017/03/04/SSM10/#SSM-BOOT" target="_blank" rel="noopener">SSM(十) 项目重构-互联网项目的Maven结构</a>中也有提到。</p>
+<h2 id="安装管理控制台"><a href="#安装管理控制台" class="headerlink" title="安装管理控制台"></a>安装管理控制台</h2><p>还有一个需要做的就是安装管理控制台，这里可以看到我们有多少服务、调用情况是怎么样等作用。</p>
+<p>这里我们可以将dubbo的官方源码下载下来，对其中的<code>dubbo-admin</code>模块进行打包，将生成的<code>WAR包</code>放到<code>Tomcat</code>中运行起来即可。</p>
+<p>但是需要注意一点的是：<br>需要将其中的<code>dubbo.properties</code>的zk地址修改为自己的即可。  </p>
+<p>dubbo.registry.address=zookeeper://127.0.0.1:2181</p>
+<p>dubbo.admin.root.password=root</p>
+<p>dubbo.admin.guest.password=guest</p>
+<p>到时候登陆的话使用root，密码也是root。<br>使用guest，密码也是guest。</p>
+<p>登陆界面如下图：<br>[![a2.jpg]</p>
+<p>其中我们可以看到有两个服务以及注册上去了，但是没有消费者。</p>
+<h2 id="消费服务"><a href="#消费服务" class="headerlink" title="消费服务"></a>消费服务</h2><p>其中在<code>SSM-CONSUMER-API</code>中我也定义了一个接口：  </p>
+<p>/*<em><br> \</em> Function:薪资API<br> * @since JDK 1.7<br> */<br>public interface SalaryInfoApi {</p>
+<pre><code>/**
+ \* 获取薪资
+ \* @param userId
+ \* @return
+ \* @throws Exception
+ */
+public SalaryInfoRsp getSalaryInfo(int userId) throws Exception;
+</code></pre><p>}</p>
+<p>因为作为消费者的同时我们也对外提供了一个获取薪资的一个服务。</p>
+<p>在<code>SSM-CONSUMER-SERVICE</code>模块中进行了实现：  </p>
+<p>/*<em><br> \</em> Function:<br> * @since JDK 1.7<br> */<br>@Service<br>public class SalaryInfoApiImpl implements SalaryInfoApi {</p>
+<pre><code>private static Logger logger = LoggerFactory.getLogger(SalaryInfoApiImpl.class);
+
+@Autowired
+
+UserInfoApi userInfoApi ;
+
+/**
+ \* 获取用户信息
+ \* @param userId
+ \* @return
+ \* @throws Exception
+ */
+@Override
+public SalaryInfoRsp getSalaryInfo(int userId) throws Exception {
+
+    logger.info(&quot;薪资查询Id=&quot;+userId);
+
+    //返回对象
+
+    SalaryInfoRsp salaryInfoRsp = new SalaryInfoRsp() ;
+
+    //调用远程服务
+
+    UserInfoRsp userInfo = userInfoApi.getUserInfo(userId);
+
+    salaryInfoRsp.setUsername(userInfo.getUserName());
+
+    return salaryInfoRsp;
+
+}
+</code></pre><p>}</p>
+<p>其中就可以直接使用<code>userInfoApi</code>调用之前的个人信息服务。</p>
+<p>再调用之前需要注意的有点是，我们只需要依赖<code>SSM-BOOT</code>这个模块即可进行调用，因为<code>SSM-BOOT</code>模块已经为我们配置了消费者之类的操作了：  </p>
+<dependency><br><br>    <groupid>com.crossoverJie</groupid><br><br>    <artifactid>SSM-BOOT</artifactid><br><br></dependency>
+
+<p>还有一点是在配置<code>SSM-BOOT</code>中的<code>spring-dubbo-cosumer.xml</code>配置文件的时候，路径要和我们初始化spring配置文件时的路径一致<br>&lt;!-- Spring和mybatis的配置文件 –&gt;</p>
+<p><context-param></context-param></p>
+<pre><code>&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+
+&lt;param-value&gt;classpath*:spring/*.xml&lt;/param-value&gt;
+</code></pre><p></p>
+<p>接下来跑个单测试一下能否调通：  </p>
+<p>/*<em><br> \</em> Function:<br> * @since JDK 1.7<br> <em>/<br>@RunWith(SpringJUnit4ClassRunner.class)<br>@ContextConfiguration(locations = { “classpath</em>:/spring/*.xml” })<br>public class SalaryInfoApiImplTest {</p>
+<pre><code>@Autowired
+
+private SalaryInfoApi salaryInfoApi ;
+
+@Test
+
+public void getSalaryInfo() throws Exception {
+
+    SalaryInfoRsp salaryInfo = salaryInfoApi.getSalaryInfo(1);
+
+    System.out.println(JSON.toJSONString(salaryInfo));
+
+}
+</code></pre><p>}</p>
+<p>接下来将消费者项目也同时启动在来观察管理控制台有什么不一样<br>会看到多了一个消费者所提供的服务<code>com.crossoverjie.consumer.api.SalaryInfoApi</code>,同时<br><code>com.crossoverJie.api.UserInfoApi</code>服务已经正常，说明已经有消费者了。<br>点进去便可查看具体的消费者。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这样一个基于dubbo的分布式服务已经讲的差不多了，在实际的开发中我们便会开发一个大系统中的某一个子应用，这样就算一个子应用出问题了也不会影响到整个大的项目。</p>
+<p>再提一点：<br>在实际的生产环境一般同一个服务我们都会有一个<code>master</code>,<code>slave</code>的主从服务，这样在上线的过程中不至于整个应用出现无法使用的尴尬情况。</p>
+<p>谈到了<code>SOA</code>的好处，那么自然也有相对于传统模式的不方便之处：</p>
+<ul>
+<li>拆分一个大的项目为成百上千的子应用就不可能手动上线了，即需要自动化的部署上线，如<code>Jenkins</code>。</li>
+<li>还有一个需要做到的就是监控，需要一个单独的监控平台来帮我们实时查看各个服务的运行情况以便于及时定位和解决问题。</li>
+<li>日志查看分析，拆分之后不可能再去每台服务器上查看日志，需要一个单独的日志查看分析工具如<code>elk</code>。</li>
+</ul>
+<p>以上就是我理解的，如有差错欢迎指正。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/10/jvm-info/" rel="next" title="jvm-info">
+                <i class="fa fa-chevron-left"></i> jvm-info
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/13/SSM-seconds-kill/" rel="prev" title="SSM-seconds-kill">
+                SSM-seconds-kill <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Rayenz</p>
+              <p class="site-description motion-element" itemprop="description">生活不苟且</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/yourname" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://plus.google.com/yourname" target="_blank" title="Google">
+                      
+                        <i class="fa fa-fw fa-google"></i>Google</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#浅谈分布式架构"><span class="nav-number">1.</span> <span class="nav-text">浅谈分布式架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SOA服务化"><span class="nav-number">2.</span> <span class="nav-text">SOA服务化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基于dubbo的实现"><span class="nav-number"></span> <span class="nav-text">基于dubbo的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#对外提供服务"><span class="nav-number">1.</span> <span class="nav-text">[]对外提供服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#spring-dubbo-config-xml"><span class="nav-number">1.1.</span> <span class="nav-text">spring-dubbo-config.xml</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#spring-dubbo-provider-xml"><span class="nav-number">1.2.</span> <span class="nav-text">spring-dubbo-provider.xml</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#spring-dubbo-consumer-xml"><span class="nav-number">1.3.</span> <span class="nav-text">spring-dubbo-consumer.xml</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装管理控制台"><span class="nav-number">2.</span> <span class="nav-text">安装管理控制台</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消费服务"><span class="nav-number">3.</span> <span class="nav-text">消费服务</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number"></span> <span class="nav-text">总结</span></a></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Rayenz</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="true"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+  
+
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+</body>
+</html>
